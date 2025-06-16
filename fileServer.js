@@ -17,42 +17,38 @@
 // const path = require('path');
 // const app = express();
 
+
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
 
-const app=express();
+const app = express();
 
+app.get('/files', (req, res) => {
+    fs.readdir(path.join(__dirname, './files'), (err, data) => {
+        if (err) {
+            return res.status(500).send("Error");
+        }
+        res.status(200).json(data);
+    });
+});
 
+app.get('/file/:filename', (req, res) => {
+    const filePath = path.join(__dirname, './files', req.params.filename);
+    fs.readFile(filePath, 'utf-8', (err, data) => {
+        if (err) {
+            return res.status(404).send('File not found');
+        }
+        res.status(200).send(data);
+    });
+});
 
-app.get('/files',(req,res)=>{
-  fs.readdir(path.join(__dirname,'./files'),(err,data)=>{
-    if(err){
-      res.status(500).send("Error")
-      return;
-    }
+app.all('*', (req, res) => {
+    res.status(404).send('File not found');
+});
 
-    res.send(data);
-  })
-})
-
-
-app.get('/files/:filename',(req,res)=>{
-  const pathy = path.join(__dirname,'./files',req.params.filename)
-  fs.readFile(pathy,'utf-8',(err,data)=>{
-      res.send(data);
-  })
-})
-
-app.all('*',(req,res)=>{
-  res.status(404).send("<h1>Hola Error Man</h1>")
-})
-
-
-app.listen(3000,(req,res)=>{
-  console.log("server running")
-})
-
-
+app.listen(3000, () => {
+    console.log("server running");
+});
 
 module.exports = app;
